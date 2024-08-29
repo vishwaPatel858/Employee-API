@@ -1,31 +1,33 @@
+const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
 const employee = require('../models/employee.model.js');
+const jwtSecret = 'dev-ipqn463hzjuhm4wx';
 
 const employeeSchema = Joi.object({
     name : Joi.string()
-            .pattern(new RegExp('^[a-zA-Z ]+$'))
-            .required()
-            .messages({
-        "string.empty": "Name cannot be empty.",
-        "string.pattern.base": "name cannot contain numbers or special characters."
-    }),
+                .pattern(new RegExp(/^[A-Za-z]+( [A-Za-z]+)*$/))
+                .required()
+                .messages({
+                            "string.empty": "Name cannot be empty.",
+                            "string.pattern.base": "name cannot contain numbers , special characters and multiple spaces."
+                }),
     email : Joi.string()
                 .email()
                 .required()
                 .messages({
-        "string.empty": "Email cannot be empty.",
-        "string.email": "Invalid email format."
-    }),
-    password : Joi.string()
-                    
-                    .required()
-                    .messages({
-        "string.empty": "Password cannot be empty.",
-        "string.pattern.base": "Password must contain one Uppercase letter , one lowercase letter , one special character and one number. Minimum length should be 8 and maximum length is 10.",
-    })
+                            "string.empty": "Email cannot be empty.",
+                            "string.email": "Invalid email format." 
+                }),
+    password: Joi.string()
+                .pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$/))
+                .required()
+                .messages({
+                    "string.empty": "Password cannot be empty.",
+                    "string.pattern.base": "Password must contain 1 Uppercase letter , 1 lowercase letter , 1 digit , 1 special character.Password length must be minimum 8 and maximum 10 characters."
+                })
 });
-//.pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$'))
+
 const getEmployees = async (req, res) => {
     try{
         const emp = await employee.find({});
@@ -56,25 +58,18 @@ const addEmployee = async (req, res) => {
             email: reqEmp.email != null ? reqEmp.email : ''  , 
             password : reqEmp.password != null ? reqEmp.password : ''
         });
-        console.log(reqEmp.password);
+
         if(result.error){
-            console.log(result.error.message);
             res.status(400).json({message : result.error.message});
         }else{
             const emailExists = await employee.findOne({ email: reqEmp.email });
-            console.log(emailExists);
             if(emailExists){
                 res.status(400).json({message : "Email already exists"});
             }else{
                 const salt = await bcrypt.genSalt(10);
-                console.log(salt + " :::::::::::::::salt");
                 let encryptedPass = await bcrypt.hash(reqEmp.password, salt);
-                console.log(encryptedPass);
                 let empJson = req.body;
                 empJson.password = encryptedPass;
-                console.log(empJson);
-                /*const checkPass = await bcrypt.compare('Atharv@456',encryptedPass);
-                console.log("checkPass : " + checkPass);*/
                 const emp = await employee.create(empJson);
                 res.status(200).json(emp);
             }
@@ -97,14 +92,11 @@ const updateEmployee =  async (req, res) => {
             res.status(400).json({message : result.error.message});
         }else{
             const emailExists = await employee.findOne({ email: reqEmp.email , _id: {$ne: id} });
-            console.log(emailExists);
             if(emailExists){
                 res.status(400).json({message : "Email already exists"});
             }else{
                 const salt = await bcrypt.genSalt(10);
-                console.log(salt + " :::::::::::::::salt");
                 let encryptedPass = await bcrypt.hash(reqEmp.password, salt);
-                console.log(encryptedPass);
                 let empJson = req.body;
                 empJson.password = encryptedPass;
                 const emp = await employee.findByIdAndUpdate(id,empJson);
@@ -135,25 +127,66 @@ const deleteEmployee = async(req, res) =>{
 
 const checkPassword = async (req, res) => {
     try{
-        console.log('Check Password');
         const id = req.params.id;
-        console.log(id);
         const password = req.params.password;
         const emp = await employee.findById(id);
         if(emp){
             const checkPass = await bcrypt.compare(password,emp.password);
-            console.log("checkPass : " + checkPass);
             return res.status(200).json({isCorrectPass : checkPass});
         }
     }catch(err){
         res.status(500).json({message : err.message});
     }
 }
+
+const generateToken = async (req, res) => {
+    try{
+        let id = req.params.id;
+        const emp = await employee.findById(id);
+        if(emp){
+            let payload = { 
+                id : id 
+            }
+            const token = jwt.sign(payload, jwtSecret, {
+                expiresIn: 86400 // 24 hours
+            });
+            return res.status(200).json({token : token});
+        }else{
+            return res.status(200).json({message : "User not found"});
+        }
+    }catch(err){
+        res.status(500).json({message : err.message});
+    }
+}
+
+const veriftToken = (req,res,next)=>{
+    try{
+        const token = req.headers['access-token'];
+        const id = req.params.id;
+        if(!token){
+            return res.status(400).json({message:"token is required"});
+        }
+        jwt.verify(token,jwtSecret,(err,decoded)=>{
+            if(err) {
+                return res.status(500).json({message : "Failed to verify token."})
+            }
+            if(id != decoded.id){
+                return res.status(403).json({message : "You are not authorized to access this API."});
+            }
+            next();
+        });
+    }catch(err){
+        return res.status(500).json({message : err.message});
+    }
+}
+
 module.exports = {
     getEmployees,
     getEmployee,
     addEmployee,
     updateEmployee,
     deleteEmployee,
-    checkPassword
+    checkPassword,
+    generateToken,
+    veriftToken
 };
