@@ -28,7 +28,7 @@ const login = async (req, res) => {
       id: id,
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: 3600,
+      expiresIn: 3600
     });
     //await redisClient.del(id);
     await redisClient.set(id, token, "EX", 3600);
@@ -42,7 +42,11 @@ const authenticate = async (req, res, next) => {
   try {
     const id = req.body.id;
     const token = req.headers["access-token"];
-    const redisToken = await redisClient.get(id);
+    const redisToken = await redisClient.get(id,(err)=>{
+      if(err) {
+        return res.status(500).json({ message: err.message });
+      }
+    });
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
         return res.status(500).json({ message: err.message });
