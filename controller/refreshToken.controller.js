@@ -118,22 +118,26 @@ const getNewRefreshToken = async (req, res) => {
 };
 
 const logoutAndDeleteToken = async (req, res) => {
-  const refreshToken = req.body.refreshtoken;
-  const isValidInput = refreshTokenValidation.validate({
-    refreshtoken: refreshToken,
-  });
-  if (isValidInput.error) {
-    return res.status(401).json({ message: isValidInput.error.message });
-  }
-  const isAvailableToken = await redisClient.get(refreshToken);
-  if (!isAvailableToken) {
-    return res.status(401).json({ message: "Invalid Token" });
-  }
-  const deleteTokenData = await redisClient.del(refreshToken);
-  if(deleteTokenData === 1){
-    return res.status(200).json({ message: "Logout Successfully." });
-  }else{
-    return res.status(500).json({ message: "Error while logout" });
+  try {
+    const refreshToken = req.body.refreshtoken;
+    const isValidInput = refreshTokenValidation.validate({
+      refreshtoken: refreshToken,
+    });
+    if (isValidInput.error) {
+      return res.status(401).json({ message: isValidInput.error.message });
+    }
+    const isAvailableToken = await redisClient.get(refreshToken);
+    if (!isAvailableToken) {
+      return res.status(401).json({ message: "Invalid Token" });
+    }
+    const deleteTokenData = await redisClient.del(refreshToken);
+    if (deleteTokenData === 1) {
+      return res.status(200).json({ message: "Logout Successfully." });
+    } else {
+      return res.status(500).json({ message: "Error while logout" });
+    }
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 module.exports = {
