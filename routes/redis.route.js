@@ -1,12 +1,19 @@
-const express = require('express');
-const {login , authenticate , generateTokenWithPayload} = require('../controller/redis.controller.js')
+const express = require("express");
+const {login , authenticate , generateTokenWithPayload , logout} = require('../controller/redis.controller.js')
+const { loginEmployee , getNewAccessToken ,getNewRefreshToken , logoutAndDeleteToken} = require("../controller/refreshToken.controller.js");
 const redisRouter = express.Router();
-const redis = require('redis');
+const refreshTokenRouter = express.Router();
 
-redisRouter.post('/login',login);
-redisRouter.get('/generate',generateTokenWithPayload);
-redisRouter.post('/profile',authenticate,(rq,res)=>{
-    res.status(200).json({message : "Protected profile is accessible"});
+redisRouter.post("/login", login);
+redisRouter.post("/generate", generateTokenWithPayload);
+redisRouter.post("/profile", authenticate, (rq, res) => {
+  res.status(200).json({ message: "Protected profile is accessible" });
 });
+redisRouter.get("/logout/:id", logout);
 
-module.exports = redisRouter;
+refreshTokenRouter.post("/login", loginEmployee);
+refreshTokenRouter.post("/accesstoken", getNewAccessToken);
+refreshTokenRouter.post("/refreshtoken", getNewRefreshToken);
+refreshTokenRouter.post("/logout", logoutAndDeleteToken);
+
+module.exports = { redisRouter, refreshTokenRouter };

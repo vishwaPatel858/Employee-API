@@ -1,11 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const employeeRoute = require('./routes/employee.route.js');
-const redisRouter = require('./routes/redis.route.js');
+const {redisRouter , refreshTokenRouter} = require('./routes/redis.route.js');
 const dotenv = require('dotenv');
-const redis =require('redis');
 const app = express();
-
 dotenv.config();
 
 //middleware
@@ -15,6 +13,7 @@ app.use(express.json());
 //routes
 app.use("/api/employee",employeeRoute);
 app.use("/redis/jwt",redisRouter);
+app.use("/redis/refreshtoken",refreshTokenRouter);
 
 app.listen(3000,()=>{
     console.log("server listening on port 3000");
@@ -25,30 +24,10 @@ mongoose.connect('mongodb+srv://employeeDB:mLB13AKKzo3DpbXO@employeedb.879lf.mon
   .catch((err)=> console.log('Error connecting to Mongo' + err.message));
 
 
-const redisClient = redis.createClient({
-    url : process.env.REDIS_URL
-});
-
-redisClient.on('connect',()=>{
-    redisClient.set('name','default',"EX",3600);
-    console.log('Redis is running on localhost: ');
-});
-
-redisClient.on('error', (err) => {
-    console.error('Redis error:', err);
-});
-
-const init = async()=>{
-    await redisClient.connect();
-}
-
-init();
-
 app.get('/', (req, res) => {
     res.send("Demo Node API Server get request!!!!!!!!!!");
 });
 
-module.exports = redisClient;
 /*app.post('/api/employee', async (req, res) => {
     try{
         let reqEmp = req.body;
