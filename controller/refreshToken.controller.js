@@ -6,6 +6,7 @@ const {
   generateAccessToken,
   generateRefreshToken,
   verifyToken,
+  deleteToken,
 } = require("../utility/jwtRedisRefresh.utility.js");
 
 const loginValidationSchema = joi.object({
@@ -77,7 +78,10 @@ const getNewAccessToken = async (req, res) => {
     const newaccessToken = await generateAccessToken(jsonData.id);
     //Refresh Token Rotation : refresh token is issued along with the new access token.
     const newRefreshToken = await generateRefreshToken(jsonData.id);
-    return res.status(200).json({ newAccessToken: newaccessToken ,newRefreshToken:newRefreshToken});
+    return res.status(200).json({
+      newAccessToken: newaccessToken,
+      newRefreshToken: newRefreshToken,
+    });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -106,7 +110,9 @@ const getNewRefreshToken = async (req, res) => {
     newRefreshToken = await generateRefreshToken(decode.id);
     status = 1;
   }
-  return res.status(200).json({ newRefreshToken: newRefreshToken , status : status });
+  return res
+    .status(200)
+    .json({ newRefreshToken: newRefreshToken, status: status });
 };
 
 const logoutAndDeleteToken = async (req, res) => {
@@ -117,12 +123,16 @@ const logoutAndDeleteToken = async (req, res) => {
   if (isValidInput.error) {
     return res.status(401).json({ message: isValidInput.error.message });
   }
-  await redisClient.del(refreshToken, (err, response) => {
-    if (err) {
-      return res.status(500).json({ message: err.message });
-    }
-    return res.status(200).json({ message: "logout successfully" });
-  });
+  const isAvailableToken = await redisClient.get(refreshToken);
+  if (!isAvailableToken) {
+    return res.status(401).json({ message: "Invalid Token" });
+  }
+  const deleteTokenData = await redisClient.del(refreshToken);
+  if(deleteTokenData === 1){
+    return res.status(200).json({ message: "Logout Successfully." });
+  }else{
+    return res.status(500).json({ message: "Error while logout" });
+  }
 };
 module.exports = {
   loginEmployee,
