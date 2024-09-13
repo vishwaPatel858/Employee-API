@@ -38,27 +38,8 @@ const verifyToken = async (token, secretKey) => {
   return decodedData;
 };
 
-const deleteToken = async (token)=>{
-  let responseData= {};
-  const isValidToken = redisClient.get(token);
-  if(!isValidToken){
-    return {message : 'Invalid token',status : 401}
-  }
-  const decode = await redisClient.del(token, (err, response) => {
-    if (err) {
-      responseData = {message: err.message,status: 500}
-    }else{
-      console.log(responseData);
-      responseData = {
-        status : 200
-      }
-    }
-  });
-  return responseData;
-}
 module.exports = {
   generateAccessToken,
   generateRefreshToken,
   verifyToken,
-  deleteToken
 };

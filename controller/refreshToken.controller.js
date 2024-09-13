@@ -6,7 +6,6 @@ const {
   generateAccessToken,
   generateRefreshToken,
   verifyToken,
-  deleteToken,
 } = require("../utility/jwtRedisRefresh.utility.js");
 
 const loginValidationSchema = joi.object({
