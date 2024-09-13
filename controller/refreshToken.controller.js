@@ -65,7 +65,7 @@ const getNewAccessToken = async (req, res) => {
     }
     const isValidRefreshToken = await redisClient.get(refreshToken);
     if (!isValidRefreshToken) {
-      return res.json({ message: "Invalid Refresh token" });
+      return res.status(401).json({ message: "Invalid Refresh token" });
     }
     const jsonData = await verifyToken(
       refreshToken,
@@ -77,6 +77,7 @@ const getNewAccessToken = async (req, res) => {
     const newaccessToken = await generateAccessToken(jsonData.id);
     //Refresh Token Rotation : refresh token is issued along with the new access token.
     const newRefreshToken = await generateRefreshToken(jsonData.id);
+    await redisClient.del(refreshToken);
     return res.status(200).json({
       newAccessToken: newaccessToken,
       newRefreshToken: newRefreshToken,
@@ -87,6 +88,7 @@ const getNewAccessToken = async (req, res) => {
 };
 
 const getNewRefreshToken = async (req, res) => {
+  console.log(`Refresh token`);
   let refreshToken = req.body.refreshToken;
   const isValidInput = refreshTokenValidation.validate({
     refreshtoken: refreshToken,
@@ -94,6 +96,7 @@ const getNewRefreshToken = async (req, res) => {
   if (isValidInput.error) {
     return res.status(500).json({ message: isValidInput.error.message });
   }
+  console.log(`Refresh token`);
   const decode = await verifyToken(
     refreshToken,
     process.env.JWT_Refresh_SECRET
