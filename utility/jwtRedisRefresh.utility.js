@@ -6,7 +6,7 @@ const generateAccessToken = async (id) => {
     id: id,
   };
   const accessToken = await jwt.sign(payload, process.env.JWT_Access_SECRET, {
-    expiresIn: 3600,
+    expiresIn: parseInt(process.env.JWT_TOKEN_EXPIRE),
   });
   return accessToken;
 };
@@ -16,7 +16,7 @@ const generateRefreshToken = async (id) => {
     id: id,
   };
   const refreshToken = await jwt.sign(payload, process.env.JWT_Refresh_SECRET, {
-    expiresIn: 86400,
+    expiresIn: parseInt(process.env.JWT_TOKEN_EXPIRE_REFRESH)
   });
   redisClient.set(id, refreshToken);
   redisClient.set(refreshToken, id);

@@ -176,7 +176,7 @@ const userLogin = async(req, res) => {
         id : id 
     }
     const token = jwt.sign(payload, jwtSecret, {
-        expiresIn: 86400 
+        expiresIn: parseInt(process.env.JWT_TOKEN_EXPIRE_REFRESH) 
     });
     return res.status(200).json({token : token});
     
