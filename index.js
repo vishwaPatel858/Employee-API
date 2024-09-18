@@ -5,10 +5,7 @@ const {redisRouter , refreshTokenRouter} = require('./routes/redis.route.js');
 const dotenv = require('dotenv');
 const app = express();
 dotenv.config();
-
-//middleware
 app.use(express.json());
-//app.use(express.urlencoded({ extended: false }));
 
 //routes
 app.use("/api/employee",employeeRoute);
@@ -19,7 +16,7 @@ app.listen(3000,()=>{
     console.log("server listening on port 3000");
 });
 
-mongoose.connect('mongodb+srv://employeeDB:mLB13AKKzo3DpbXO@employeedb.879lf.mongodb.net/EmployeeDB?retryWrites=true&w=majority&appName=EmployeeDB')
+mongoose.connect(process.env.MONGO_DB_URL)
   .then(() => console.log('Connected to Mongo DB'))
   .catch((err)=> console.log('Error connecting to Mongo' + err.message));
 
