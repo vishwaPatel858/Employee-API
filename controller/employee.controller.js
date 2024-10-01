@@ -42,6 +42,11 @@ const getEmployees = async (req, res) => {
   try {
     const response = await getEmployeesData();
     res.status(response.status).json(response);
+    /*
+      getEmployeesData().then((response)=>{
+        res.status(response.status).json(response);  
+      }).catch((error)=>{res.status(error.status).json(error.message})
+    */
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -55,6 +60,10 @@ const getEmployee = async (req, res) => {
     }
     const response = await getEmployeeData(id);
     res.status(response.status).json(response);
+    /*
+    getEmployeeData(id).then((response) => res.status(response.status).json(response))
+    .catch((err) => res.status(err.status).json(err.message));
+    */
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -75,6 +84,11 @@ const addEmployee = async (req, res) => {
     }
     const response = await createEmployee(reqEmp);
     res.status(response.status).json(response);
+    /** 
+     createEmployee(reqEmp)
+     .then((response)=>res.status(response.status).json(response))
+     .catch((err)=>res.status(err.status).json(err));
+    */
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -95,6 +109,13 @@ const updateEmployee = async (req, res) => {
     }
     const response = await updateEmployeeData(id, reqEmp);
     res.status(response.status).json(response);
+    /** 
+     updateEmployeeData(id, reqEmp).then((response)=>{
+        res.status(response.status).json(response);
+      }).catch((err)=>{
+        res.status(err.status).json(err.message);
+      });
+    */
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -105,6 +126,11 @@ const deleteEmployee = async (req, res) => {
     const { id } = req.params;
     const response = await deleteEmployeeData(id);
     res.status(response.status).json(response);
+    /** 
+     deleteEmployeeData(id).then((response) => {
+      res.status(response.status).json(response}).catch((err) => {
+        res.status(err.status).json(err));  
+    */
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -115,6 +141,12 @@ const checkPassword = async (req, res) => {
     let { id, password } = req.params;
     const response = await validatePassword(id, password);
     res.status(response.status).json(response);
+    /** 
+     validatePassword(id, password).then((response)=>{
+      res.status(response.status).json(response);
+      }).catch((err)=>{
+        res.status(500).json({ message: err.message });});
+    */
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -125,6 +157,13 @@ const generateToken = async (req, res) => {
     let { id } = req.params;
     const response = await tokenGenerate(id);
     res.status(response.status).json(response);
+    /** 
+     tokenGenerate(id).then((response) =>{
+      res.status(response.status).json(response);
+    }).catch((err) =>{
+      res.status(500).json({ message: err.message });  
+    });
+    */
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -135,6 +174,13 @@ const userLogin = async (req, res) => {
     const { id, password } = req.body;
     const response = await testLogin(id, password);
     res.status(response.status).json(response);
+    /** 
+     testLogin(id, password).then((response) => {
+      res.status(response.status).json(response);
+    }).catch((err) =>{
+      res.status(500).json({ message: err.message });
+      });
+    */
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

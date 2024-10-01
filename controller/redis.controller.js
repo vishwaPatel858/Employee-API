@@ -3,6 +3,9 @@ const {
   redisLogin,
   redisAuthentication,
   logoutRedis,
+  sendOTP,
+  otpVerification,
+  resetPassword,
 } = require("../service/redistoken.service.js");
 const {
   generateAccessToken,
@@ -70,9 +73,56 @@ const logout = async (req, res) => {
   res.status(response.status).json(response);
 };
 
+const forgetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    sendOTP(email)
+      .then((response) => {
+        res.status(200).json(response);
+      })
+      .catch((err) => {
+        res.status(500).json({ message: err.message });
+      });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    otpVerification(email, otp)
+      .then((response) => {
+        res.status(response.status).json(response);
+      })
+      .catch((err) => {
+        res.status(500).json({ message: err.message });
+      });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const resetPass = (req, res) => {
+  try {
+    const { password, token } = req.body;
+    resetPassword(token, password)
+      .then((response) => {
+        res.status(200).json(response);
+      })
+      .catch((err) => {
+        res.status(500).json({ message: err.message });
+      });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 module.exports = {
   login,
   authenticate,
   generateTokenWithPayload,
   logout,
+  forgetPassword,
+  verifyOTP,
+  resetPass
 };

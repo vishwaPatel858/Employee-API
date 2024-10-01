@@ -13,6 +13,7 @@ const getEmployeesData = async () => {
       message: err.message,
       status: 500,
     };
+    //throw err;
   }
 };
 
@@ -34,6 +35,7 @@ const getEmployeeData = async (id) => {
       message: err.message,
       status: 500,
     };
+    //throw err;
   }
 };
 
@@ -59,6 +61,7 @@ const createEmployee = async (employee) => {
       message: err.message,
       status: 500,
     };
+    //throw err;
   }
 };
 
@@ -94,6 +97,7 @@ const updateEmployeeData = async (id, employee) => {
       message: err.message,
       status: 500,
     };
+    //throw err;
   }
 };
 
@@ -115,6 +119,7 @@ const deleteEmployeeData = async (id) => {
       message: err.message,
       status: 500,
     };
+    //throw err;
   }
 };
 
@@ -137,6 +142,7 @@ const validatePassword = async (id, password) => {
       message: err.message,
       status: 500,
     };
+    //throw err;
   }
 };
 
@@ -165,6 +171,7 @@ const tokenGenerate = async (id) => {
       status: 500,
     };
   }
+  //throw err;
 };
 
 const testLogin = async (id, password) => {
@@ -187,7 +194,9 @@ const testLogin = async (id, password) => {
       token: token,
       status: 200,
     };
-  } catch (err) {}
+  } catch (err) {
+    //throw err;
+  }
 };
 
 const tokenVerification = async (id, token) => {
@@ -217,6 +226,7 @@ const tokenVerification = async (id, token) => {
       message: err.message,
       status: 500,
     };
+    //throw err;
   }
 };
 
