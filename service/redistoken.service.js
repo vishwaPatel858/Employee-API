@@ -92,7 +92,7 @@ const otpVerification = async (email, otp) => {
   try {
     const actualOTP = await redisClient.get(email);
     console.log(actualOTP);
-    await redisClient.del(userEmail);
+    await redisClient.del(email);
     if (actualOTP == otp) {
       const employee = await Employee.findOne({ email: email });
       console.log(employee);
