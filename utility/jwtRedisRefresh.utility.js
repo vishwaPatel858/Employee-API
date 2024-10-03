@@ -23,8 +23,8 @@ const generateRefreshToken = async (payload) => {
         expiresIn: parseInt(process.env.JWT_TOKEN_EXPIRE_REFRESH),
       }
     );
-    redisClient.set(id, refreshToken);
-    redisClient.set(refreshToken, id);
+    redisClient.set(payload.id, refreshToken);
+    redisClient.set(refreshToken, payload.id);
     return refreshToken;
   } catch (err) {
     return {
